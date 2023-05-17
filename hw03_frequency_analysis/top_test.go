@@ -80,3 +80,22 @@ func TestTop10(t *testing.T) {
 		}
 	})
 }
+
+func TestTop10Optional(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []string
+	}{
+		{input: "b c a", expected: []string{"a", "b", "c"}},
+		{input: "a a b b b", expected: []string{"b", "a"}},
+		{input: "a a! a. a, b b", expected: []string{"b", "a", "a!", "a,", "a."}},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			require.Equal(t, tc.expected, Top10(tc.input))
+		})
+	}
+
+}
