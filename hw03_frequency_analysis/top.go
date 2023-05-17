@@ -13,6 +13,7 @@ type KeyVal struct {
 func Top10(s string) []string {
 	var r []string
 	words := strings.Fields(s)
+
 	cnt := make(map[string]int)
 	for _, k := range words {
 		cnt[k]++
@@ -36,8 +37,17 @@ func Top10(s string) []string {
 		return kvs[i].word < kvs[j].word
 	})
 
-	for i := 0; i < 10; i++ {
+	l := min(10, len(cnt))
+	for i := 0; i < l; i++ {
 		r = append(r, kvs[i].word)
 	}
+
 	return r
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
