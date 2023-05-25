@@ -120,4 +120,15 @@ func TestList(t *testing.T) {
 		}
 		require.Equal(t, []int{2, 3, 1}, elems)
 	})
+
+	t.Run("artificial situation", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("should panic")
+			}
+		}()
+		c := NewList()
+		i := new(ListItem)
+		c.Remove(i)
+	})
 }

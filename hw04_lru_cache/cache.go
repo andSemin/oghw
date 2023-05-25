@@ -1,10 +1,17 @@
 package hw04lrucache
 
 import (
+	"sync"
+
 	"golang.org/x/exp/maps"
 )
 
 type Key string
+
+type KeyVal struct {
+	key Key
+	val interface{}
+}
 
 type Cache interface {
 	Set(key Key, value interface{}) bool
@@ -16,39 +23,43 @@ type lruCache struct {
 	capacity int
 	queue    List
 	items    map[Key]*ListItem
-	pointers map[*ListItem]Key
+	mutex    *sync.Mutex
 }
 
 func (c *lruCache) Set(key Key, value interface{}) bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	if val, ok := c.items[key]; ok {
-		val.Value = value
+		val.Value.(*KeyVal).val = value
 		c.queue.MoveToFront(val)
 		return true
 	}
 
 	if c.capacity == c.queue.Len() {
 		i := c.queue.Back()
-		delete(c.items, c.pointers[i])
-		delete(c.pointers, i)
+		delete(c.items, i.Value.(*KeyVal).key)
 		c.queue.Remove(i)
 	}
 
-	c.items[key] = c.queue.PushFront(value)
-	c.pointers[c.items[key]] = key
+	c.items[key] = c.queue.PushFront(&KeyVal{key, value})
 
 	return false
 }
 
 func (c *lruCache) Get(key Key) (interface{}, bool) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	if val, ok := c.items[key]; ok {
-		return val.Value, ok
+		return val.Value.(*KeyVal).val, ok
 	}
+
 	return nil, false
 }
 
 func (c *lruCache) Clear() {
 	maps.Clear(c.items)
-	maps.Clear(c.pointers)
 }
 
 func NewCache(capacity int) Cache {
@@ -56,6 +67,6 @@ func NewCache(capacity int) Cache {
 		capacity: capacity,
 		queue:    NewList(),
 		items:    make(map[Key]*ListItem, capacity),
-		pointers: make(map[*ListItem]Key, capacity),
+		mutex:    &sync.Mutex{},
 	}
 }

@@ -35,27 +35,24 @@ func (l *list) Back() *ListItem {
 }
 
 func (l *list) PushFront(v interface{}) *ListItem {
-	i := ListItem{v, nil, nil}
-	l.pushFront(&i)
-
-	return &i
-}
-
-func (l *list) pushFront(i *ListItem) {
 	l.len++
+	i := ListItem{v, nil, nil}
+
 	switch {
 	case l.head == nil && l.tail == nil:
-		l.head = i
-		l.tail = i
+		l.head = &i
+		l.tail = &i
 	case l.head == l.tail:
 		i.Next = l.tail
-		l.head = i
+		l.head = &i
 		l.tail.Prev = l.head
 	default:
 		i.Next = l.head
-		l.head.Prev = i
-		l.head = i
+		l.head.Prev = &i
+		l.head = &i
 	}
+
+	return &i
 }
 
 func (l *list) PushBack(v interface{}) *ListItem {
@@ -79,6 +76,9 @@ func (l *list) PushBack(v interface{}) *ListItem {
 }
 
 func (l *list) Remove(i *ListItem) {
+	if l.len < 1 {
+		panic("follow the artificial situation")
+	}
 	l.len--
 	switch {
 	case l.head == l.tail:
@@ -98,10 +98,20 @@ func (l *list) Remove(i *ListItem) {
 }
 
 func (l *list) MoveToFront(i *ListItem) {
-	if i != l.head {
-		l.Remove(i)
-		l.pushFront(i)
+	switch {
+	case l.head == l.tail || i.Prev == nil:
+		return
+	case i.Next == nil:
+		l.tail = i.Prev
+		l.tail.Next = nil
+		i.Prev = nil
+	default:
+		i.Prev.Next, i.Next.Prev = i.Next, i.Prev
 	}
+
+	i.Next = l.head
+	l.head.Prev = i
+	l.head = i
 }
 
 func NewList() List {
