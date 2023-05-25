@@ -104,7 +104,6 @@ func TestList(t *testing.T) {
 		l.Remove(i2)
 		require.Nil(t, l.Front())
 		require.Nil(t, l.Back())
-
 	})
 
 	t.Run("move to front", func(t *testing.T) {
@@ -120,6 +119,5 @@ func TestList(t *testing.T) {
 			elems = append(elems, i.Value.(int))
 		}
 		require.Equal(t, []int{2, 3, 1}, elems)
-
 	})
 }

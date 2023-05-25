@@ -29,6 +29,7 @@ func (l *list) Len() int {
 func (l *list) Front() *ListItem {
 	return l.head
 }
+
 func (l *list) Back() *ListItem {
 	return l.tail
 }
@@ -42,14 +43,15 @@ func (l *list) PushFront(v interface{}) *ListItem {
 
 func (l *list) pushFront(i *ListItem) {
 	l.len++
-	if l.head == nil && l.tail == nil {
+	switch {
+	case l.head == nil && l.tail == nil:
 		l.head = i
 		l.tail = i
-	} else if l.head == l.tail {
+	case l.head == l.tail:
 		i.Next = l.tail
 		l.head = i
 		l.tail.Prev = l.head
-	} else {
+	default:
 		i.Next = l.head
 		l.head.Prev = i
 		l.head = i
@@ -59,14 +61,15 @@ func (l *list) pushFront(i *ListItem) {
 func (l *list) PushBack(v interface{}) *ListItem {
 	l.len++
 	i := ListItem{v, nil, nil}
-	if l.head == nil && l.tail == nil {
+	switch {
+	case l.head == nil && l.tail == nil:
 		l.head = &i
 		l.tail = &i
-	} else if l.head == l.tail {
+	case l.head == l.tail:
 		i.Prev = l.head
 		l.tail = &i
 		l.head.Next = l.tail
-	} else {
+	default:
 		i.Prev = l.tail
 		l.tail.Next = &i
 		l.tail = &i
@@ -77,18 +80,19 @@ func (l *list) PushBack(v interface{}) *ListItem {
 
 func (l *list) Remove(i *ListItem) {
 	l.len--
-	if l.head == l.tail {
+	switch {
+	case l.head == l.tail:
 		l.head = nil
 		l.tail = nil
-	} else if i.Prev == nil {
+	case i.Prev == nil:
 		l.head = i.Next
 		l.head.Prev = nil
 		i.Next = nil
-	} else if i.Next == nil {
+	case i.Next == nil:
 		l.tail = i.Prev
 		l.tail.Next = nil
 		i.Prev = nil
-	} else {
+	default:
 		i.Prev.Next, i.Next.Prev = i.Next, i.Prev
 	}
 }
