@@ -59,6 +59,8 @@ func (c *lruCache) Get(key Key) (interface{}, bool) {
 }
 
 func (c *lruCache) Clear() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 	maps.Clear(c.items)
 }
 
