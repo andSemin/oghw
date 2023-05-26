@@ -48,4 +48,87 @@ func TestList(t *testing.T) {
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})
+
+	t.Run("fill", func(t *testing.T) {
+		l := NewList()
+
+		i1 := l.PushFront(1)
+		require.Equal(t, i1, l.Front())
+		require.Equal(t, i1, l.Back())
+
+		i2 := l.PushFront(2)
+		require.Equal(t, i2, l.Front())
+		require.Equal(t, i1, l.Back())
+		require.Equal(t, i1, l.Front().Next)
+		require.Equal(t, i2, l.Back().Prev)
+
+		i3 := l.PushFront(3)
+
+		require.Equal(t, i3, l.Front())
+		require.Equal(t, i2, l.Front().Next)
+		require.Equal(t, i1, l.Front().Next.Next)
+		require.Equal(t, i1, l.Back())
+		require.Equal(t, i2, l.Back().Prev)
+		require.Equal(t, i3, l.Back().Prev.Prev)
+
+		l = NewList()
+
+		i1 = l.PushBack(1)
+		require.Equal(t, i1, l.Front())
+		require.Equal(t, i1, l.Back())
+	})
+
+	t.Run("remove", func(t *testing.T) {
+		l := NewList()
+
+		i1 := l.PushFront(1)
+		i2 := l.PushFront(2)
+		i3 := l.PushFront(3)
+		i4 := l.PushFront(4)
+
+		l.Remove(i3)
+		elems := make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
+		}
+		require.Equal(t, []int{4, 2, 1}, elems)
+
+		l.Remove(i4)
+		elems = make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
+		}
+		require.Equal(t, []int{2, 1}, elems)
+
+		l.Remove(i1)
+		l.Remove(i2)
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+	})
+
+	t.Run("move to front", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1)
+		i2 := l.PushFront(2)
+		l.PushFront(3)
+
+		l.MoveToFront(i2)
+		elems := make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value.(int))
+		}
+		require.Equal(t, []int{2, 3, 1}, elems)
+	})
+
+	t.Run("artificial situation", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Errorf("should panic")
+			}
+		}()
+		c := NewList()
+		i := new(ListItem)
+		c.Remove(i)
+	})
 }
