@@ -51,7 +51,7 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	for _, t := range tasks {
-		if errCnt >= errLimit {
+		if atomic.LoadInt64(&errCnt) >= errLimit {
 			break
 		}
 		ch <- t
@@ -60,7 +60,7 @@ func Run(tasks []Task, n, m int) error {
 	close(ch)
 	wg.Wait()
 
-	if errCnt >= errLimit {
+	if atomic.LoadInt64(&errCnt) >= errLimit {
 		return ErrErrorsLimitExceeded
 	}
 
