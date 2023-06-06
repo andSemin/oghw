@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"runtime"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -66,5 +67,40 @@ func TestRun(t *testing.T) {
 
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
+	})
+
+	t.Run("goroutines leak", func(t *testing.T) {
+		tasksCount := 3
+		tasks := make([]Task, 0, tasksCount)
+		goroutinesBefore := runtime.NumGoroutine()
+		for i := 0; i < tasksCount; i++ {
+			tasks = append(tasks, func() error {
+				return nil
+			})
+		}
+		Run(tasks, 2, 3)
+		require.Equal(t, goroutinesBefore, runtime.NumGoroutine())
+	})
+
+	t.Run("without error", func(t *testing.T) {
+		tasksCount := 4
+		tasks := make([]Task, 0, tasksCount)
+		for i := 0; i < tasksCount; i++ {
+			err := fmt.Errorf("error from task %d", i)
+			tasks = append(tasks, func() error {
+				return err
+			})
+		}
+		err := Run(tasks, 2, 0)
+		require.Nil(t, err)
+	})
+
+	t.Run("check errors", func(t *testing.T) {
+		tasks := make([]Task, 0, 1)
+		err := Run(tasks, 0, 1)
+		require.ErrorIs(t, err, ErrNotEnoughGoroutines)
+
+		err = Run(tasks, 1, -1)
+		require.ErrorIs(t, err, ErrNegNumberOfAllowedErrors)
 	})
 }
