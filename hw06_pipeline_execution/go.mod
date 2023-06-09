@@ -1,4 +1,4 @@
-module github.com/andSemin/hw06_pipeline_execution
+module github.com/andSemin/oghw/hw06_pipeline_execution
 
 go 1.19
 
